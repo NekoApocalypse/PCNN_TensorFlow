@@ -1,0 +1,8 @@
+# ignore data
+/data
+/origin_data
+# ignore saved model
+/model
+# ignore model output
+/train_loss
+
