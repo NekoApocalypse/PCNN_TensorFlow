@@ -5,4 +5,5 @@
 /model
 # ignore model output
 /train_loss
-
+# ignore data output
+/out

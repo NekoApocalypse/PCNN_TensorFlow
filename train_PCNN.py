@@ -12,6 +12,8 @@ tf.app.flags.DEFINE_string('summary_dir', '.', 'path to store summary')
 
 
 def main(_):
+    time_start = time.time()
+
     save_path = './model/'
 
     print('reading word embedding')
@@ -23,13 +25,13 @@ def main(_):
     train_pos1 = np.load('./data/small_pos1.npy')
     train_pos2 = np.load('./data/small_pos2.npy')
 
-    context_word, context_pos1, context_pos2 = context_split(
-        train_word, train_pos1, train_pos2
+    context_word, context_pos1, context_pos2, context_y = context_split(
+        train_word, train_pos1, train_pos2, train_y
     )
 
     settings = network.Settings()
     settings.vocab_size = len(word_embedding)
-    settings.num_classes = len(train_y[0])
+    settings.num_classes = len(context_y[0])
 
     print(settings.num_classes)
 
@@ -124,7 +126,7 @@ def main(_):
                             tmp_word[loc].append(context_word[loc][k])
                             tmp_pos1[loc].append(context_pos1[loc][k])
                             tmp_pos2[loc].append(context_pos2[loc][k])
-                        tmp_y.append(train_y[k])
+                        tmp_y.append(context_y[k])
                     num = 0
                     for single_word in tmp_word[0]:
                         num += len(single_word)
@@ -137,13 +139,20 @@ def main(_):
                                settings.entity_count)
 
                     current_step = tf.train.global_step(sess, global_step)
-                    if current_step  > 9000 and current_step % 500 == 0:
+                    if current_step > 9000 and current_step % 500 == 0:
                         print('saving model')
                         path = saver.save(sess, save_path + 'PCNN_model',
                                           global_step=current_step)
                         tmpstr = 'saved model to ' + path
                         print(tmpstr)
+    time_finish = time.time()
+    time_elapsed = time_finish - time_start
+    print('Time Used:', str(datetime.timedelta(seconds=time_elapsed)))
 
 
 if __name__ == '__main__':
+    time_str = datetime.datetime.now().isoformat()
+    print(time_str)
     tf.app.run()
+    time_str = datetime.datetime.now().isoformat()
+    print(time_str)

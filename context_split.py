@@ -12,7 +12,7 @@ def sentence_pad(origin, pos1, pos2, pad_token):
     return part_left, part_mid, part_right
 
 
-def context_split(train_word, train_pos1, train_pos2):
+def context_split(train_word, train_pos1, train_pos2, train_y):
     # [num_position, num_entity, num_sentences, sentence_len]
     # special_tokens: 'BLANK', 'UNK'
     special_token = np.load('./data/special_token.npy')
@@ -21,6 +21,7 @@ def context_split(train_word, train_pos1, train_pos2):
     context_word = [[], [], []]
     context_pos1 = [[], [], []]
     context_pos2 = [[], [], []]
+    context_y = []
     skipped_sentences = 0
     skipped_entity_pair = 0
     input_length = len(train_word[0][0])
@@ -34,8 +35,18 @@ def context_split(train_word, train_pos1, train_pos2):
                 # print(i, j)
                 skipped_sentences += 1
                 continue
-            pos1_id = train_pos1[i][j].index(61)
-            pos2_id = train_pos2[i][j].index(61)
+
+            # Warning:
+            # training data contains python lists at the last dimension,
+            # but testing data contains np.ndarray at the last dimension.
+            # Note:
+            # The output of sentence_pad should all be lists.
+            if isinstance(train_pos1[i][j], np.ndarray):
+                pos1_id = train_pos1[i][j].tolist().index(61)
+                pos2_id = train_pos2[i][j].tolist().index(61)
+            else:
+                pos1_id = train_pos1[i][j].index(61)
+                pos2_id = train_pos2[i][j].index(61)
             # each part is padded to input_length
             word_left, word_mid, word_right = \
                 sentence_pad(train_word[i][j], pos1_id, pos2_id, blank_token)
@@ -64,6 +75,7 @@ def context_split(train_word, train_pos1, train_pos2):
             context_word[t].append(word_buffer[t])
             context_pos1[t].append(pos1_buffer[t])
             context_pos2[t].append(pos2_buffer[t])
+        context_y.append(train_y[i])
     print('Skipped sentences: ', skipped_sentences)
     print('Skipped entity pairs: ', skipped_entity_pair)
-    return context_word, context_pos1, context_pos2
+    return context_word, context_pos1, context_pos2, context_y

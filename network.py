@@ -8,8 +8,8 @@ class Settings(object):
         self.word_emb_size = 50
         self.num_classes = 53
         self.input_size = 70
-        self.window_size = 4
-        self.hidden_size = 80
+        self.window_size = 6
+        self.hidden_size = 100
         self.dense_size = 200
         self.num_maps = 4
         self.epochs = 3
@@ -145,8 +145,9 @@ class PCNN:
         bag_alpha = []
         bag_output = []
         bag_logits = []
-        bag_prob = []
+        # bag_prob = []
         self.predictions = []
+        self.prob = []
         self.loss = []
         self.accuracy = []
         self.total_loss = 0.0
@@ -174,11 +175,12 @@ class PCNN:
                     [self.num_classes]
                 ), bag_bias)
             )
-            bag_prob.append(tf.nn.softmax(bag_logits[i]))
+            self.prob.append(tf.nn.softmax(bag_logits[i]))
+            # bag_prob.append(tf.nn.softmax(bag_logits[i]))
 
             with tf.name_scope('output'):
                 self.predictions.append(
-                    tf.argmax(bag_prob[i], 0, name='predictions'))
+                    tf.argmax(self.prob[i], 0, name='predictions'))
 
             with tf.name_scope('loss'):
                 self.loss.append(tf.reduce_mean(
