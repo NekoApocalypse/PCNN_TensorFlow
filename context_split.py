@@ -1,6 +1,19 @@
 import numpy as np
 
 
+def mask_gen(origin, pos1, pos2):
+    mask_left = [0] * len(origin)
+    mask_mid = [0] * len(origin)
+    mask_right = [0] * len(origin)
+    mask_left[:pos1 + 1] = [1] * (pos1 + 1)
+    mask_mid[pos1: pos2 + 1] = [1] * (pos2 + 1 - pos1)
+    mask_right[pos2:] = [1] * (len(origin) - pos2)
+    assert len(origin) == len(mask_left)
+    assert len(origin) == len(mask_mid)
+    assert len(origin) == len(mask_right)
+    return mask_left, mask_mid, mask_left
+
+
 def sentence_pad(origin, pos1, pos2, pad_token):
     part_left = [pad_token] * len(origin)
     part_mid = [pad_token] * len(origin)
@@ -10,6 +23,66 @@ def sentence_pad(origin, pos1, pos2, pad_token):
     part_mid[pos1: pos2 + 1] = origin[pos1: pos2 + 1]
     part_right[pos2:] = origin[pos2:]
     return part_left, part_mid, part_right
+
+
+def context_mask(train_word, train_pos1, train_pos2, train_y):
+    skipped_sentences = 0
+    skipped_entity_pair = 0
+    mask_left = []
+    mask_mid = []
+    mask_right = []
+    context_x = []
+    context_y = []
+    context_pos1 = []
+    context_pos2 = []
+    for i in range(len(train_word)):
+        buffer_left = []
+        buffer_mid = []
+        buffer_right = []
+        buffer_x = []
+        buffer_pos1 = []
+        buffer_pos2 = []
+        for j in range(len(train_word[i])):
+            if not ((61 in train_pos1[i][j]) and (61 in train_pos2[i][j])):
+                # print(i, j)
+                skipped_sentences += 1
+                continue
+            # Warning:
+            # training data contains python lists at the last dimension,
+            # but testing data contains np.ndarray at the last dimension.
+            if isinstance(train_pos1[i][j], np.ndarray):
+                pos1_id = train_pos1[i][j].tolist().index(61)
+                pos2_id = train_pos2[i][j].tolist().index(61)
+            else:
+                pos1_id = train_pos1[i][j].index(61)
+                pos2_id = train_pos2[i][j].index(61)
+
+            tmp_left, tmp_mid, tmp_right = mask_gen(
+                train_word[i][j], pos1_id, pos2_id)
+            buffer_left.append(tmp_left)
+            buffer_mid.append(tmp_mid)
+            buffer_right.append(tmp_right)
+            buffer_x.append(train_word[i][j])
+            buffer_pos1.append(train_pos1[i][j])
+            buffer_pos2.append(train_pos2[i][j])
+
+        if not buffer_left:
+            skipped_entity_pair += 1
+            continue
+
+        assert len(buffer_left) == len(buffer_x)
+        mask_left.append(buffer_left)
+        mask_mid.append(buffer_mid)
+        mask_right.append(buffer_right)
+        context_x.append(buffer_x)
+        context_pos1.append(buffer_pos1)
+        context_pos2.append(buffer_pos2)
+        context_y.append(train_y[i])
+
+    assert len(mask_left) == len(context_x)
+    print('Skipped sentences: ', skipped_sentences)
+    print('Skipped entity pairs: ', skipped_entity_pair)
+    return mask_left, mask_mid, mask_right, context_x, context_pos1, context_pos2, context_y
 
 
 def context_split(train_word, train_pos1, train_pos2, train_y):
