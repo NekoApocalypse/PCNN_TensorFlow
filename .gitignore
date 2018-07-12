@@ -9,3 +9,5 @@
 /out
 # ignore PyCharm files
 /.idea
+# ignore temporary file
+/__pycache__

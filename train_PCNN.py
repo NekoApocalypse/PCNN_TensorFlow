@@ -30,10 +30,6 @@ def main(_):
         train_word, train_pos1, train_pos2, train_y
     )
 
-    mask_left, mask_mid, mask_right = mask_gen(
-        train_word, train_pos1, train_pos2
-    )
-
     settings = network.Settings()
     settings.vocab_size = len(word_embedding)
     settings.num_classes = len(context_y[0])
