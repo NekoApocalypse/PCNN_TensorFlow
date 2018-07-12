@@ -13,7 +13,7 @@ Theoratically speaking the later version should be the 'correct' implementation 
 Prabably the 'incorrect' version will yield better results. Who knows. It's Machine Learning.
 
 # Data
-Dataset is available as 'origin_data.zip'. Extract this file and run 'initial.py' to get training data.
+Dataset is available as 'origin_data.tar.gz'. Extract this file and run 'initial.py' to get training data.
 
 # Envorinment
 Tensorflow 1.4 & Python 3.5.2
