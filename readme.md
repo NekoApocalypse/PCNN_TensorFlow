@@ -8,15 +8,12 @@ In the original version we slice sentences into three parts and pad each part to
 
 In the 'masked pooling' version, we do not slice the input sentence. Instead, we use a zero-one masks to split outputs of convolution layer.
 
-Theoratically speaking the later version should be the 'correct' implementation of PCNN, but we keep the original for comparison.
-
-Prabably the 'incorrect' version will yield better results. Who knows. It's Machine Learning.
+Theoratically speaking the later version should be the correct implementation of PCNN, but we keep the original for comparison.
 
 # Data
 Dataset is available as 'origin_data.tar.gz'. Extract this file and run 'initial.py' to get training data.
 
 # Requirement
-* CUDA 8.0
 * Tensorflow 1.4
 * Python 3.5.2
 
